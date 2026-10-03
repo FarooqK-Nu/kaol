@@ -1,0 +1,33 @@
+# Existing project exclusions
+Personal_Docs/
+Docs/
+Agents.md
+prompt.md
+artifacts/
+
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+build/
+.turbo/
+
+# Environment files
+.env
+.env.local
+*.local
+
+# Local job processing storage (temporary media & artifacts)
+data/jobs/
+data/temp/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
