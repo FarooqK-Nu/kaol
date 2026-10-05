@@ -1,0 +1,11 @@
+{
+  "id": "seg_000001",
+  "sequence": 1,
+  "start": 4.18,
+  "end": 7.92,
+  "duration": 3.74,
+  "arabic": "السلام عليكم ورحمة الله وبركاته",
+  "english": "Peace be upon you.",
+  "wordIds": ["word_000001", "word_000002"],
+  "timingQuality": "aligned"
+}

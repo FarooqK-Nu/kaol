@@ -1,0 +1,11 @@
+{
+  "id": "word_000001",
+  "textRaw": "السلام",
+  "textNormalized": "السلام",
+  "start": 4.18,
+  "end": 4.71,
+  "asrProbability": 0.98,
+  "timingSource": "whisperx",
+  "alignmentStatus": "aligned",
+  "sourceSegmentId": 0
+}

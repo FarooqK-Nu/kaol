@@ -1,0 +1,11 @@
+{
+  "id": "word_000002",
+  "textRaw": "يا",
+  "textNormalized": "يا",
+  "start": null,
+  "end": null,
+  "asrProbability": 0.85,
+  "timingSource": "unknown",
+  "alignmentStatus": "unaligned",
+  "sourceSegmentId": 0
+}
