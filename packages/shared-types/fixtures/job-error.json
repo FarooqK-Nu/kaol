@@ -1,0 +1,6 @@
+{
+  "code": "TRANSCRIPTION_FAILED",
+  "message": "Transcription failed.",
+  "stage": "transcribing",
+  "retryable": true
+}
