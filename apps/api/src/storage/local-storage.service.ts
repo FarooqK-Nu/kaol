@@ -254,6 +254,12 @@ export class LocalStorageService implements StorageService {
     await fsPromises.rm(jobDir, { recursive: true, force: true });
   }
 
+  public getStorageReference(jobId: string, filename: string): string {
+    this.validateJobId(jobId);
+    this.validateFilename(filename);
+    return `data/jobs/${jobId}/${filename}`;
+  }
+
   private isEnoent(err: unknown): boolean {
     return (
       typeof err === "object" &&

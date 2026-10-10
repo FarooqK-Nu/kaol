@@ -208,5 +208,17 @@ describe("LocalStorageService", () => {
         ).rejects.toThrow(StoragePathTraversalError);
       });
     });
+
+    it("returns normalized logical storage reference", () => {
+      const storageInstance = new LocalStorageService();
+      const ref = storageInstance.getStorageReference("job_1234567890", "input.mp4");
+      expect(ref).toBe("data/jobs/job_1234567890/input.mp4");
+    });
+
+    it("validates jobId and filename when getting storage reference", () => {
+      const storageInstance = new LocalStorageService();
+      expect(() => storageInstance.getStorageReference("invalid", "input.mp4")).toThrow();
+      expect(() => storageInstance.getStorageReference("job_1234567890", "../evil.mp4")).toThrow();
+    });
   });
 });

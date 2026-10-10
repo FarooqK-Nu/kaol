@@ -51,4 +51,10 @@ export interface StorageService {
    * Deletes the entire job workspace.
    */
   cleanupJob(jobId: string): Promise<void>;
+
+  /**
+   * Returns the canonical logical storage reference string to be persisted
+   * in job metadata (e.g. "data/jobs/<jobId>/<filename>").
+   */
+  getStorageReference(jobId: string, filename: string): string;
 }
