@@ -1,15 +1,17 @@
-import express from "express";
+import express, { type Express } from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import { env } from "./config/env";
+import { getHealth } from "./modules/health/health.controller";
+import { closeDbConnection } from "./database/client/db";
+import { closeRedisConnection } from "./database/client/redis";
 
-dotenv.config();
+export const app: Express = express();
 
-const app = express();
-const port = process.env.API_PORT || 3000;
-
-app.use(cors());
+app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(express.json());
 
+// Public health & ping endpoints
+app.get("/api/health", getHealth);
 app.get("/api/ping", (_req, res) => {
   res.json({
     status: "ok",
@@ -18,6 +20,30 @@ app.get("/api/ping", (_req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`[API] Server listening on http://localhost:${port}`);
-});
+let server: ReturnType<typeof app.listen> | null = null;
+
+if (env.NODE_ENV !== "test") {
+  server = app.listen(env.API_PORT, () => {
+    console.log(`[API] Server listening on http://localhost:${env.API_PORT}`);
+  });
+}
+
+export async function stopServer(): Promise<void> {
+  if (server) {
+    await new Promise<void>((resolve, reject) => {
+      server?.close((err) => (err ? reject(err) : resolve()));
+    });
+  }
+  await closeDbConnection();
+  await closeRedisConnection();
+}
+
+// Graceful shutdown
+const handleShutdown = async (signal: string) => {
+  console.log(`[API] Received ${signal}, closing gracefully...`);
+  await stopServer();
+  process.exit(0);
+};
+
+process.on("SIGINT", () => handleShutdown("SIGINT"));
+process.on("SIGTERM", () => handleShutdown("SIGTERM"));
