@@ -1,13 +1,22 @@
 import crypto from "node:crypto";
+import type { Readable } from "node:stream";
 import type { JobStatus } from "@kaol/shared-types";
 import { jobRepository, type JobRepository } from "./jobs.repository";
 import { isValidJobTransition, InvalidJobTransitionError } from "./jobs.transitions";
 import type { JobSelectModel } from "../../database/schema/jobs";
+import { LocalStorageService, type StorageService } from "../../storage";
 
 export interface CreateJobInput {
   id?: string;
   sourceFilename?: string;
   sourceMediaReference?: string;
+}
+
+export interface CreateJobFromStreamInput {
+  originalFilename: string;
+  extension: string;
+  stream: Readable;
+  done?: Promise<void>;
 }
 
 export interface TransitionOptions {
@@ -17,7 +26,10 @@ export interface TransitionOptions {
 }
 
 export class JobsService {
-  constructor(private readonly repo: JobRepository = jobRepository) {}
+  constructor(
+    private readonly repo: JobRepository = jobRepository,
+    private readonly storage: StorageService = new LocalStorageService()
+  ) {}
 
   generateJobId(): string {
     return `job_${crypto.randomUUID().replace(/-/g, "")}`;
@@ -33,6 +45,39 @@ export class JobsService {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+  }
+
+  async createJobFromStream(input: CreateJobFromStreamInput): Promise<JobSelectModel> {
+    const id = this.generateJobId();
+    const filename = `input${input.extension}`;
+
+    await this.storage.createJobWorkspace(id);
+
+    try {
+      await this.storage.saveStream(id, filename, input.stream);
+      if (input.done) {
+        await input.done;
+      }
+    } catch (err) {
+      await this.storage.cleanupJob(id).catch(() => {});
+      throw err;
+    }
+
+    const sourceMediaReference = this.storage.getStorageReference(id, filename);
+
+    try {
+      return await this.repo.createJob({
+        id,
+        status: "queued",
+        sourceFilename: input.originalFilename,
+        sourceMediaReference,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    } catch (err) {
+      await this.storage.cleanupJob(id).catch(() => {});
+      throw err;
+    }
   }
 
   async getJobById(id: string): Promise<JobSelectModel | null> {

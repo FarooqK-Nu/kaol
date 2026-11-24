@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 import cors from "cors";
 import { env } from "./config/env";
 import { getHealth } from "./modules/health/health.controller";
+import { jobsRouter } from "./modules/jobs/jobs.router";
 import { closeDbConnection } from "./database/client/db";
 import { closeRedisConnection } from "./database/client/redis";
 
@@ -17,6 +18,19 @@ app.get("/api/ping", (_req, res) => {
     status: "ok",
     timestamp: new Date().toISOString(),
     service: "api",
+  });
+});
+
+// Jobs routes
+app.use("/api/jobs", jobsRouter);
+
+// Global error handler for public error compliance
+app.use((_err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  res.status(500).json({
+    error: {
+      code: "INTERNAL_SERVER_ERROR",
+      message: "An unexpected error occurred.",
+    },
   });
 });
 
